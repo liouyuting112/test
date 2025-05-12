@@ -4,12 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>英翻中單字練習</title>
-  
-  <!-- 引入 manifest -->
-  <link rel="manifest" href="manifest.json" />
 
   <style>
-    /* 簡單的 CSS 用於頁面布局 */
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f9;
@@ -20,7 +16,6 @@
       align-items: center;
       height: 100vh;
     }
-
     .quiz-box {
       background-color: white;
       padding: 20px;
@@ -29,12 +24,10 @@
       width: 100%;
       max-width: 400px;
     }
-
     .question {
       font-size: 20px;
       margin-bottom: 20px;
     }
-
     .options button {
       display: block;
       width: 100%;
@@ -46,33 +39,27 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
     .options button:hover {
       background-color: #0056b3;
     }
-
     .result {
       margin-top: 20px;
     }
-
     .counter {
       margin-top: 20px;
     }
-
     .button {
       padding: 10px;
-      margin: 10px;
+      margin: 10px 0;
       background-color: #28a745;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-
     .button:hover {
       background-color: #218838;
     }
-
     .repeat-btn {
       background-color: #ffc107;
     }
@@ -87,16 +74,15 @@
     <div class="counter" id="counter"></div>
     <button class="button" id="resetBtn" onclick="resetProgress()">重置進度</button>
     <button class="button" id="historyBtn" onclick="showHistory()">查看歷史題目</button>
-    <div id="historyNav">
+    <div id="historyNav" style="display:none">
       <button class="button" id="prevHistoryBtn" onclick="showPrevHistory()">上一題</button>
       <button class="button" id="nextHistoryBtn" onclick="showNextHistory()">下一題</button>
       <button class="button" id="backBtn" onclick="returnToQuiz()">回到練習</button>
     </div>
-    <button class="repeat-btn" id="repeatBtn" onclick="repeatAudio()">重複播放發音</button>
+    <button class="repeat-btn button" id="repeatBtn" onclick="repeatAudio()">🔊 重複播放發音</button>
   </div>
 
   <script>
-    // 單字題庫
     const vocabList = [
   {
     "eng": "abound",
@@ -1811,11 +1797,9 @@
     const optionsBox = document.getElementById('options');
     const resultBox = document.getElementById('result');
     const counterBox = document.getElementById('counter');
-    const repeatBtn = document.getElementById('repeatBtn');
     const nextBtn = document.getElementById('nextBtn');
     const historyNav = document.getElementById('historyNav');
 
-    // 隨機打亂選項
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -1823,7 +1807,6 @@
       }
     }
 
-    // 下一題
     function nextQuestion() {
       if (isHistoryMode) return;
 
@@ -1843,13 +1826,9 @@
       } while (usedIndices.includes(randomIndex));
 
       usedIndices.push(randomIndex);
-
       currentQuestion = vocabList[randomIndex];
 
       questionBox.textContent = `「${currentQuestion.eng}」的中文是？`;
-
-      // 播放英文發音（可選）
-      speakEnglish(currentQuestion.eng);
 
       const choices = [currentQuestion.ch];
       while (choices.length < 4) {
@@ -1867,13 +1846,13 @@
           resultBox.textContent = isCorrect
             ? `✅ 答對了！「${currentQuestion.eng}」是「${currentQuestion.ch}」`
             : `❌ 錯了！「${currentQuestion.eng}」應該是「${currentQuestion.ch}」，你選的是「${choice}」`;
-          
           history.push({
             eng: currentQuestion.eng,
             ch: currentQuestion.ch,
             selected: choice,
             isCorrect
           });
+          speakEnglish(currentQuestion.eng); // 使用者互動後播放
         };
         optionsBox.appendChild(btn);
       });
@@ -1881,14 +1860,22 @@
       counterBox.textContent = `總題數：${total}，已完成：${usedIndices.length}，剩下：${total - usedIndices.length}`;
     }
 
-    // 播放英文發音
     function speakEnglish(word) {
-      const msg = new SpeechSynthesisUtterance(word);
-      msg.lang = 'en-US';
-      window.speechSynthesis.speak(msg);
+      if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(word);
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+      } else {
+        alert("您的瀏覽器不支援語音播放功能。");
+      }
     }
 
-    // 重置進度
+    function repeatAudio() {
+      if (currentQuestion.eng) {
+        speakEnglish(currentQuestion.eng);
+      }
+    }
+
     function resetProgress() {
       usedIndices = [];
       history = [];
@@ -1898,7 +1885,6 @@
       nextQuestion();
     }
 
-    // 查看歷史題目
     function showHistory() {
       if (history.length === 0) {
         alert('還沒有作答紀錄喔！');
@@ -1912,11 +1898,11 @@
     }
 
     function showCurrentHistory() {
-      const currentHistoryItem = history[historyIndex];
-      questionBox.textContent = `「${currentHistoryItem.eng}」的中文是？`;
-      resultBox.textContent = currentHistoryItem.isCorrect
-        ? `✅ 答對了！「${currentHistoryItem.eng}」是「${currentHistoryItem.ch}」`
-        : `❌ 錯了！「${currentHistoryItem.eng}」應該是「${currentHistoryItem.ch}」，你選的是「${currentHistoryItem.selected}」`;
+      const item = history[historyIndex];
+      questionBox.textContent = `「${item.eng}」的中文是？`;
+      resultBox.textContent = item.isCorrect
+        ? `✅ 答對了！「${item.eng}」是「${item.ch}」`
+        : `❌ 錯了！「${item.eng}」應該是「${item.ch}」，你選的是「${item.selected}」`;
     }
 
     function showPrevHistory() {
@@ -1944,3 +1930,4 @@
   </script>
 </body>
 </html>
+ 
