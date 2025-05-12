@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>英翻中單字練習</title>
+  
+  <!-- 引入 manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    /* 簡單的 CSS 用於頁面布局 */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .quiz-box {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .question {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .options button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .options button:hover {
+      background-color: #0056b3;
+    }
+
+    .result {
+      margin-top: 20px;
+    }
+
+    .counter {
+      margin-top: 20px;
+    }
+
+    .button {
+      padding: 10px;
+      margin: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #218838;
+    }
+
+    .repeat-btn {
+      background-color: #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-box">
+    <div id="question" class="question"></div>
+    <div class="options" id="options"></div>
+    <button class="button" onclick="nextQuestion()" id="nextBtn">下一題</button>
+    <div class="result" id="result"></div>
+    <div class="counter" id="counter"></div>
+    <button class="button" id="resetBtn" onclick="resetProgress()">重置進度</button>
+    <button class="button" id="historyBtn" onclick="showHistory()">查看歷史題目</button>
+    <div id="historyNav">
+      <button class="button" id="prevHistoryBtn" onclick="showPrevHistory()">上一題</button>
+      <button class="button" id="nextHistoryBtn" onclick="showNextHistory()">下一題</button>
+      <button class="button" id="backBtn" onclick="returnToQuiz()">回到練習</button>
+    </div>
+    <button class="repeat-btn" id="repeatBtn" onclick="repeatAudio()">重複播放發音</button>
+  </div>
+
+  <script>
+    // 單字題庫
+    const vocabList = [
+  {
+    "eng": "abound",
+    "ch": "豐富；充滿"
+  },
+  {
+    "eng": "aim",
+    "ch": "目標"
+  },
+  {
+    "eng": "affiliate",
+    "ch": "分部"
+  },
+  {
+    "eng": "autorize",
+    "ch": "授權"
+  },
+  {
+    "eng": "Annulment",
+    "ch": "廢除"
+  },
+  {
+    "eng": "assignment",
+    "ch": "指定"
+  },
+  {
+    "eng": "Accounting",
+    "ch": "會計"
+  },
+  {
+    "eng": "account",
+    "ch": "帳戶；業務；客戶"
+  },
+  {
+    "eng": "accessible",
+    "ch": "可接近的"
+  },
+  {
+    "eng": "accessories",
+    "ch": "飾品"
+  },
+  {
+    "eng": "acclaimed",
+    "ch": "廣受好評"
+  },
+  {
+    "eng": "appliance",
+    "ch": "應用"
+  },
+  {
+    "eng": "affirm",
+    "ch": "確認"
+  },
+  {
+    "eng": "arose",
+    "ch": "發生"
+  },
+  {
+    "eng": "attendance",
+    "ch": "出席"
+  },
+  {
+    "eng": "agreement",
+    "ch": "同意；協定"
+  },
+  {
+    "eng": "approval",
+    "ch": "贊成"
+  },
+  {
+    "eng": "attentive",
+    "ch": "注意的"
+  },
+  {
+    "eng": "aid",
+    "ch": "幫助"
+  },
+  {
+    "eng": "achievement",
+    "ch": "成就"
+  },
+  {
+    "eng": "appraisal",
+    "ch": "評價"
+  },
+  {
+    "eng": "assessment",
+    "ch": "評估"
+  },
+  {
+    "eng": "accuracy",
+    "ch": "準確性"
+  },
+  {
+    "eng": "adjourn",
+    "ch": "休會；延期"
+  },
+  {
+    "eng": "adaptable",
+    "ch": "適應力強的"
+  },
+  {
+    "eng": "ambitious",
+    "ch": "有野心的"
+  },
+  {
+    "eng": "asylum",
+    "ch": "收容所"
+  },
+  {
+    "eng": "approbation",
+    "ch": "稱讚；認可"
+  },
+  {
+    "eng": "anarchy",
+    "ch": "無政府"
+  },
+  {
+    "eng": "articles",
+    "ch": "用品"
+  },
+  {
+    "eng": "annuity",
+    "ch": "年金"
+  },
+  {
+    "eng": "automated teller machine",
+    "ch": "自動提款機ATM"
+  },
+  {
+    "eng": "avocation",
+    "ch": "副業"
+  },
+  {
+    "eng": "alloy",
+    "ch": "合金"
+  },
+  {
+    "eng": "appeal",
+    "ch": "呼籲"
+  },
+  {
+    "eng": "audit",
+    "ch": "查帳"
+  },
+  {
+    "eng": "accrue",
+    "ch": "增加"
+  },
+  {
+    "eng": "audible",
+    "ch": "可聽見的"
+  },
+  {
+    "eng": "affluent",
+    "ch": "富裕的"
+  },
+  {
+    "eng": "auspicious",
+    "ch": "吉利的"
+  },
+  {
+    "eng": "advisor",
+    "ch": "顧問"
+  },
+  {
+    "eng": "attendant",
+    "ch": "服務員"
+  },
+  {
+    "eng": "assistant",
+    "ch": "助理"
+  },
+  {
+    "eng": "advocate",
+    "ch": "提倡者"
+  },
+  {
+    "eng": "architect",
+    "ch": "建築師"
+  },
+  {
+    "eng": "accountant",
+    "ch": "會計師"
+  },
+  {
+    "eng": "attendee",
+    "ch": "出席者"
+  },
+  {
+    "eng": "audience",
+    "ch": "觀眾"
+  },
+  {
+    "eng": "astrology",
+    "ch": "占星學"
+  },
+  {
+    "eng": "astronomy",
+    "ch": "天文學"
+  },
+  {
+    "eng": "asteroid",
+    "ch": "小行星"
+  },
+  {
+    "eng": "acid",
+    "ch": "酸"
+  },
+  {
+    "eng": "alkalinity",
+    "ch": "鹼度"
+  },
+  {
+    "eng": "aluminum",
+    "ch": "鋁"
+  },
+  {
+    "eng": "archipelago",
+    "ch": "群島"
+  },
+  {
+    "eng": "ammeter",
+    "ch": "電流錶"
+  },
+  {
+    "eng": "anode",
+    "ch": "陽極"
+  },
+  {
+    "eng": "appointment",
+    "ch": "預約；約會"
+  },
+  {
+    "eng": "allocate",
+    "ch": "分配；分派"
+  },
+  {
+    "eng": "applicant",
+    "ch": "申請人"
+  },
+  {
+    "eng": "appoint",
+    "ch": "指派"
+  },
+  {
+    "eng": "acquisition",
+    "ch": "獲得"
+  },
+  {
+    "eng": "amplify",
+    "ch": "擴大"
+  },
+  {
+    "eng": "asset",
+    "ch": "資產"
+  },
+  {
+    "eng": "acquire",
+    "ch": "獲得"
+  },
+  {
+    "eng": "assess",
+    "ch": "評估"
+  },
+  {
+    "eng": "amendment",
+    "ch": "修正"
+  },
+  {
+    "eng": "agenda",
+    "ch": "議程"
+  },
+  {
+    "eng": "alternative",
+    "ch": "替代的"
+  },
+  {
+    "eng": "announce",
+    "ch": "宣布"
+  },
+  {
+    "eng": "articulate",
+    "ch": "善於表達的"
+  },
+  {
+    "eng": "automaton",
+    "ch": "機器人"
+  },
+  {
+    "eng": "applaud",
+    "ch": "鼓掌"
+  },
+  {
+    "eng": "audition",
+    "ch": "試聽"
+  },
+  {
+    "eng": "aerobics",
+    "ch": "有氧運動"
+  },
+  {
+    "eng": "alleviate",
+    "ch": "減輕"
+  },
+  {
+    "eng": "antibiotic",
+    "ch": "抗生素"
+  },
+  {
+    "eng": "affection",
+    "ch": "感情；好感"
+  },
+  {
+    "eng": "aspect",
+    "ch": "方面；觀點"
+  },
+  {
+    "eng": "assumption",
+    "ch": "假設"
+  },
+  {
+    "eng": "attempt",
+    "ch": "試圖"
+  },
+  {
+    "eng": "alter",
+    "ch": "改變"
+  },
+  {
+    "eng": "assurance",
+    "ch": "保證"
+  },
+  {
+    "eng": "absurd",
+    "ch": "荒謬的"
+  },
+  {
+    "eng": "ample",
+    "ch": "充裕的"
+  },
+  {
+    "eng": "approximately",
+    "ch": "大約"
+  },
+  {
+    "eng": "administrator",
+    "ch": "行政人員"
+  },
+  {
+    "eng": "affiliation",
+    "ch": "聯繫；聯合"
+  },
+  {
+    "eng": "antagonism",
+    "ch": "對抗；敵對"
+  },
+  {
+    "eng": "adaptability",
+    "ch": "適應性"
+  },
+  {
+    "eng": "aggressiveness",
+    "ch": "攻擊性；進取性"
+  },
+  {
+    "eng": "administrative ability",
+    "ch": "行政管理能力"
+  },
+  {
+    "eng": "autocratic leader",
+    "ch": "專制式領導"
+  },
+  {
+    "eng": "achievement-oriented leadership",
+    "ch": "成就取向型領導"
+  },
+  {
+    "eng": "appraisal tool",
+    "ch": "評價工具"
+  },
+  {
+    "eng": "be absent from",
+    "ch": "缺席"
+  },
+  {
+    "eng": "absence or mind",
+    "ch": "心不在焉"
+  },
+  {
+    "eng": "absorb",
+    "ch": "吸收；吸引"
+  },
+  {
+    "eng": "abundant in",
+    "ch": "富有"
+  },
+  {
+    "eng": "by accident",
+    "ch": "意外地"
+  },
+  {
+    "eng": "in accord with",
+    "ch": "與...一致"
+  },
+  {
+    "eng": "with one accord",
+    "ch": "全體一致地"
+  },
+  {
+    "eng": "in accordance with",
+    "ch": "根據"
+  },
+  {
+    "eng": "on one's own account",
+    "ch": "為了自己的利益"
+  },
+  {
+    "eng": "on account",
+    "ch": "帳戶"
+  },
+  {
+    "eng": "on account of",
+    "ch": "因為"
+  },
+  {
+    "eng": "on no account",
+    "ch": "絕不"
+  },
+  {
+    "eng": "of ...account",
+    "ch": "有...重要性"
+  },
+  {
+    "eng": "take...into account",
+    "ch": "把......考慮進去"
+  },
+  {
+    "eng": "give sb. an account of",
+    "ch": "解釋"
+  },
+  {
+    "eng": "account for",
+    "ch": "解釋"
+  },
+  {
+    "eng": "accuse...of",
+    "ch": "控告"
+  },
+  {
+    "eng": "be accustomed to",
+    "ch": "習慣於"
+  },
+  {
+    "eng": "be acquainted with",
+    "ch": "精通"
+  },
+  {
+    "eng": "act on",
+    "ch": "聽從...行事"
+  },
+  {
+    "eng": "adapt oneself to",
+    "ch": "適應"
+  },
+  {
+    "eng": "adjust oneself to",
+    "ch": "使自己適應"
+  },
+  {
+    "eng": "adapt...(for)",
+    "ch": "改編"
+  },
+  {
+    "eng": "in addition",
+    "ch": "此外"
+  },
+  {
+    "eng": "in addition to",
+    "ch": "除了...之外"
+  },
+  {
+    "eng": "as well as",
+    "ch": "以及"
+  },
+  {
+    "eng": "adhere to",
+    "ch": "遵守"
+  },
+  {
+    "eng": "abide by",
+    "ch": "遵守"
+  },
+  {
+    "eng": "adjacent",
+    "ch": "鄰近的"
+  },
+  {
+    "eng": "admit of",
+    "ch": "容許"
+  },
+  {
+    "eng": "in advance",
+    "ch": "事先"
+  },
+  {
+    "eng": "to advantage",
+    "ch": "優點"
+  },
+  {
+    "eng": "have an advantage over",
+    "ch": "勝過"
+  },
+  {
+    "eng": "take advantage of",
+    "ch": "利用"
+  },
+  {
+    "eng": "agree with",
+    "ch": "同意(人)"
+  },
+  {
+    "eng": "agree to",
+    "ch": "同意（事）"
+  },
+  {
+    "eng": "in agreement (with)",
+    "ch": "與...一致"
+  },
+  {
+    "eng": "ahead of",
+    "ch": "在...之前"
+  },
+  {
+    "eng": "in all",
+    "ch": "全部"
+  },
+  {
+    "eng": "after all",
+    "ch": "畢竟"
+  },
+  {
+    "eng": "(not) at all",
+    "ch": "一點也不"
+  },
+  {
+    "eng": "all at once",
+    "ch": "突然地"
+  },
+  {
+    "eng": "above all",
+    "ch": "最重要的是"
+  },
+  {
+    "eng": "all in all",
+    "ch": "總而言之"
+  },
+  {
+    "eng": "all but",
+    "ch": "幾乎"
+  },
+  {
+    "eng": "allow for",
+    "ch": "考慮到"
+  },
+  {
+    "eng": "amount to",
+    "ch": "總計"
+  },
+  {
+    "eng": "answer for",
+    "ch": "對...負責"
+  },
+  {
+    "eng": "answer to",
+    "ch": "回應"
+  },
+  {
+    "eng": "be anxious about",
+    "ch": "對...感到焦慮"
+  },
+  {
+    "eng": "anxious for",
+    "ch": "渴望；擔憂"
+  },
+  {
+    "eng": "apologize to sb. for sth.",
+    "ch": "為...向...道歉"
+  },
+  {
+    "eng": "appeal to sb. for sth.",
+    "ch": "為某事向某人呼籲"
+  },
+  {
+    "eng": "appeal to sb.",
+    "ch": "吸引"
+  },
+  {
+    "eng": "apply to sb. for sth.",
+    "ch": "為...向...申請"
+  },
+  {
+    "eng": "apply for",
+    "ch": "申請"
+  },
+  {
+    "eng": "apply to",
+    "ch": "適用於"
+  },
+  {
+    "eng": "approve of",
+    "ch": "贊成"
+  },
+  {
+    "eng": "arise from",
+    "ch": "起因於"
+  },
+  {
+    "eng": "arrange for sb./sth. to do sth.",
+    "ch": "安排...做"
+  },
+  {
+    "eng": "arrive on",
+    "ch": "到達"
+  },
+  {
+    "eng": "arrive at",
+    "ch": "到達(小地方)"
+  },
+  {
+    "eng": "arrive in",
+    "ch": "到達(大地方)"
+  },
+  {
+    "eng": "be ashamed of",
+    "ch": "感到羞愧"
+  },
+  {
+    "eng": "assure sb. of sth.",
+    "ch": "向...保證"
+  },
+  {
+    "eng": ". attach(to)",
+    "ch": "附上"
+  },
+  {
+    "eng": "make an attempt at doing sth.",
+    "ch": "試圖做..."
+  },
+  {
+    "eng": "attend to",
+    "ch": "照料"
+  },
+  {
+    "eng": "attitude to",
+    "ch": "對...的態度"
+  },
+  {
+    "eng": "attribute to",
+    "ch": "歸因於"
+  },
+  {
+    "eng": "on the average",
+    "ch": "平均"
+  },
+  {
+    "eng": "(be) aware of",
+    "ch": "意識到"
+  },
+  {
+    "eng": "at the back of",
+    "ch": "在...後面"
+  },
+  {
+    "eng": "at one's back",
+    "ch": "支持"
+  },
+  {
+    "eng": "adjacent to",
+    "ch": "鄰接的"
+  },
+  {
+    "eng": "at one's fingertips",
+    "ch": "目前"
+  },
+  {
+    "eng": "ability",
+    "ch": "能力"
+  },
+  {
+    "eng": "accordingly",
+    "ch": "因此"
+  },
+  {
+    "eng": "actually",
+    "ch": "事實上"
+  },
+  {
+    "eng": "adjustment",
+    "ch": "調整"
+  },
+  {
+    "eng": "advise",
+    "ch": "建議"
+  },
+  {
+    "eng": "agree",
+    "ch": "同意"
+  },
+  {
+    "eng": "airline",
+    "ch": "航空公司"
+  },
+  {
+    "eng": "amend",
+    "ch": "修正"
+  },
+  {
+    "eng": "annoying",
+    "ch": "惱人的"
+  },
+  {
+    "eng": "appetizer",
+    "ch": "開胃菜"
+  },
+  {
+    "eng": "approach",
+    "ch": "接近"
+  },
+  {
+    "eng": "argue",
+    "ch": "爭論"
+  },
+  {
+    "eng": "assets",
+    "ch": "資產"
+  },
+  {
+    "eng": "attach",
+    "ch": "附上"
+  },
+  {
+    "eng": "accommodate",
+    "ch": "容納"
+  },
+  {
+    "eng": "agreeable",
+    "ch": "令人愉快的"
+  },
+  {
+    "eng": "aisle",
+    "ch": "走道"
+  },
+  {
+    "eng": "annual",
+    "ch": "一年一度的"
+  },
+  {
+    "eng": "appreciable",
+    "ch": "明顯的"
+  },
+  {
+    "eng": "appropriate",
+    "ch": "適當的"
+  },
+  {
+    "eng": "assign",
+    "ch": "指派"
+  },
+  {
+    "eng": "attachment",
+    "ch": "附件"
+  },
+  {
+    "eng": "awareness",
+    "ch": "察覺"
+  },
+  {
+    "eng": "absolutely",
+    "ch": "絕對地"
+  },
+  {
+    "eng": "accommodation",
+    "ch": "住宿"
+  },
+  {
+    "eng": "adapter",
+    "ch": "適配器"
+  },
+  {
+    "eng": "advantageous",
+    "ch": "有利的;有益的"
+  },
+  {
+    "eng": "afford",
+    "ch": "負擔得起"
+  },
+  {
+    "eng": "alarm",
+    "ch": "警報"
+  },
+  {
+    "eng": "amusing",
+    "ch": "有趣的"
+  },
+  {
+    "eng": "anticipate",
+    "ch": "預期"
+  },
+  {
+    "eng": "appreciate",
+    "ch": "欣賞"
+  },
+  {
+    "eng": "approve",
+    "ch": "贊成"
+  },
+  {
+    "eng": "arrange",
+    "ch": "安排"
+  },
+  {
+    "eng": "authority",
+    "ch": "權威"
+  },
+  {
+    "eng": "accept",
+    "ch": "接受"
+  },
+  {
+    "eng": "affordable",
+    "ch": "負擔得起的"
+  },
+  {
+    "eng": "agricultural",
+    "ch": "農業的"
+  },
+  {
+    "eng": "analysis",
+    "ch": "分析"
+  },
+  {
+    "eng": "anxious",
+    "ch": "焦慮的"
+  },
+  {
+    "eng": "application",
+    "ch": "申請"
+  },
+  {
+    "eng": "approximate",
+    "ch": "大約的"
+  },
+  {
+    "eng": "arrangement",
+    "ch": "安排"
+  },
+  {
+    "eng": "assist",
+    "ch": "幫助"
+  },
+  {
+    "eng": "authorize",
+    "ch": "授權"
+  },
+  {
+    "eng": "accomplishment",
+    "ch": "成就"
+  },
+  {
+    "eng": "admittance",
+    "ch": "進入"
+  },
+  {
+    "eng": "advertisement",
+    "ch": "廣告"
+  },
+  {
+    "eng": "agency",
+    "ch": "機構"
+  },
+  {
+    "eng": "analyze",
+    "ch": "分析"
+  },
+  {
+    "eng": "apologize",
+    "ch": "道歉"
+  },
+  {
+    "eng": "apply",
+    "ch": "申請"
+  },
+  {
+    "eng": "appreciative",
+    "ch": "讚賞的；感激的"
+  },
+  {
+    "eng": "arbitrate",
+    "ch": "仲裁；公斷"
+  },
+  {
+    "eng": "assemble",
+    "ch": "組裝"
+  },
+  {
+    "eng": "assistance",
+    "ch": "協助"
+  },
+  {
+    "eng": "attentively",
+    "ch": "專心地"
+  },
+  {
+    "eng": "availability",
+    "ch": "有效"
+  },
+  {
+    "eng": "advance",
+    "ch": "事先；前進"
+  },
+  {
+    "eng": "announcement",
+    "ch": "宣布"
+  },
+  {
+    "eng": "apprentice",
+    "ch": "學徒"
+  },
+  {
+    "eng": "attract",
+    "ch": "吸引"
+  },
+  {
+    "eng": "able",
+    "ch": "能夠"
+  },
+  {
+    "eng": "above",
+    "ch": "在...上面"
+  },
+  {
+    "eng": "abroad",
+    "ch": "在國外"
+  },
+  {
+    "eng": "across",
+    "ch": "橫越;穿過"
+  },
+  {
+    "eng": "act",
+    "ch": "行動；表演"
+  },
+  {
+    "eng": "action",
+    "ch": "動作"
+  },
+  {
+    "eng": "afraid",
+    "ch": "害怕的"
+  },
+  {
+    "eng": "apartment",
+    "ch": "公寓"
+  },
+  {
+    "eng": "appear",
+    "ch": "出現"
+  },
+  {
+    "eng": "aunt",
+    "ch": "阿姨；姑姑"
+  },
+  {
+    "eng": "absence",
+    "ch": "缺席"
+  },
+  {
+    "eng": "absent",
+    "ch": "缺席的"
+  },
+  {
+    "eng": "accident",
+    "ch": "意外"
+  },
+  {
+    "eng": "activity",
+    "ch": "活動"
+  },
+  {
+    "eng": "addition",
+    "ch": "此外"
+  },
+  {
+    "eng": "address",
+    "ch": "處理；地址"
+  },
+  {
+    "eng": "admit",
+    "ch": "承認"
+  },
+  {
+    "eng": "advice",
+    "ch": "忠告"
+  },
+  {
+    "eng": "affair",
+    "ch": "事件"
+  },
+  {
+    "eng": "affect",
+    "ch": "影響"
+  },
+  {
+    "eng": "against",
+    "ch": "反對；對抗"
+  },
+  {
+    "eng": "ahead",
+    "ch": "向前"
+  },
+  {
+    "eng": "aircraft",
+    "ch": "飛機"
+  },
+  {
+    "eng": "album",
+    "ch": "專輯"
+  },
+  {
+    "eng": "alike",
+    "ch": "相像的"
+  },
+  {
+    "eng": "alive",
+    "ch": "活著的"
+  },
+  {
+    "eng": "altogether",
+    "ch": "完全地"
+  },
+  {
+    "eng": "among",
+    "ch": "在...之中"
+  },
+  {
+    "eng": "amount",
+    "ch": "數量"
+  },
+  {
+    "eng": "ancient",
+    "ch": "古代的"
+  },
+  {
+    "eng": "ankle",
+    "ch": "腳踝"
+  },
+  {
+    "eng": "ape",
+    "ch": "猿；猴"
+  },
+  {
+    "eng": "appearance",
+    "ch": "外表"
+  },
+  {
+    "eng": "appetite",
+    "ch": "食慾"
+  },
+  {
+    "eng": "arrival",
+    "ch": "到達"
+  },
+  {
+    "eng": "article",
+    "ch": "文章"
+  },
+  {
+    "eng": "asleep",
+    "ch": "睡著的"
+  },
+  {
+    "eng": "attend",
+    "ch": "出席"
+  },
+  {
+    "eng": "author",
+    "ch": "作者"
+  },
+  {
+    "eng": "available",
+    "ch": "可用的"
+  },
+  {
+    "eng": "average",
+    "ch": "平均"
+  },
+  {
+    "eng": "acceptable",
+    "ch": "可接受的"
+  },
+  {
+    "eng": "accurate",
+    "ch": "精確的"
+  },
+  {
+    "eng": "ache",
+    "ch": "疼痛"
+  },
+  {
+    "eng": "achieve",
+    "ch": "達成"
+  },
+  {
+    "eng": "additional",
+    "ch": "額外的"
+  },
+  {
+    "eng": "admire",
+    "ch": "欣賞"
+  },
+  {
+    "eng": "advanced",
+    "ch": "先進的"
+  },
+  {
+    "eng": "advantage",
+    "ch": "優點"
+  },
+  {
+    "eng": "adventure",
+    "ch": "冒險"
+  },
+  {
+    "eng": "advertise",
+    "ch": "廣告"
+  },
+  {
+    "eng": "afterward",
+    "ch": "後來"
+  },
+  {
+    "eng": "agriculture",
+    "ch": "農業"
+  },
+  {
+    "eng": "alley",
+    "ch": "小巷"
+  },
+  {
+    "eng": "almond",
+    "ch": "杏仁"
+  },
+  {
+    "eng": "alphabet",
+    "ch": "字母"
+  },
+  {
+    "eng": "ambassador",
+    "ch": "大使"
+  },
+  {
+    "eng": "ambition",
+    "ch": "野心"
+  },
+  {
+    "eng": "ambulance",
+    "ch": "救護車"
+  },
+  {
+    "eng": "anyhow",
+    "ch": "無論如何"
+  },
+  {
+    "eng": "apart",
+    "ch": "分開地"
+  },
+  {
+    "eng": "apron",
+    "ch": "圍裙"
+  },
+  {
+    "eng": "armed",
+    "ch": "武裝的"
+  },
+  {
+    "eng": "arrest",
+    "ch": "逮捕"
+  },
+  {
+    "eng": "ash",
+    "ch": "灰燼"
+  },
+  {
+    "eng": "aside",
+    "ch": "在...旁邊"
+  },
+  {
+    "eng": "assume",
+    "ch": "假設"
+  },
+  {
+    "eng": "athlete",
+    "ch": "運動員"
+  },
+  {
+    "eng": "attitude",
+    "ch": "態度"
+  },
+  {
+    "eng": "automatic",
+    "ch": "自動的"
+  },
+  {
+    "eng": "automobile",
+    "ch": "汽車"
+  },
+  {
+    "eng": "avenue",
+    "ch": "大道"
+  },
+  {
+    "eng": "awaken",
+    "ch": "喚醒"
+  },
+  {
+    "eng": "award",
+    "ch": "獎品"
+  },
+  {
+    "eng": "aware",
+    "ch": "知道的"
+  },
+  {
+    "eng": "awful",
+    "ch": "糟糕的"
+  },
+  {
+    "eng": "awkward",
+    "ch": "尷尬的"
+  },
+  {
+    "eng": "abandon",
+    "ch": "放棄"
+  },
+  {
+    "eng": "absolute",
+    "ch": "絕對的"
+  },
+  {
+    "eng": "abstract",
+    "ch": "抽象的"
+  },
+  {
+    "eng": "academic",
+    "ch": "學術的"
+  },
+  {
+    "eng": "accent",
+    "ch": "口音"
+  },
+  {
+    "eng": "acceptance",
+    "ch": "接受"
+  },
+  {
+    "eng": "access",
+    "ch": "進入"
+  },
+  {
+    "eng": "accidental",
+    "ch": "意外的"
+  },
+  {
+    "eng": "accompany",
+    "ch": "陪伴"
+  },
+  {
+    "eng": "accomplish",
+    "ch": "完成"
+  },
+  {
+    "eng": "accuse",
+    "ch": "指控"
+  },
+  {
+    "eng": "acquaintance",
+    "ch": "認識"
+  },
+  {
+    "eng": "adapt",
+    "ch": "適應"
+  },
+  {
+    "eng": "addict",
+    "ch": "上癮"
+  },
+  {
+    "eng": "adequate",
+    "ch": "足夠的"
+  },
+  {
+    "eng": "adjust",
+    "ch": "調整"
+  },
+  {
+    "eng": "admirable",
+    "ch": "令人欽佩的"
+  },
+  {
+    "eng": "admiration",
+    "ch": "欽佩"
+  },
+  {
+    "eng": "admission",
+    "ch": "承認"
+  },
+  {
+    "eng": "adopt",
+    "ch": "採用；收養"
+  },
+  {
+    "eng": "agent",
+    "ch": "經紀人"
+  },
+  {
+    "eng": "aggressive",
+    "ch": "侵略的；好鬥的"
+  },
+  {
+    "eng": "alcohol",
+    "ch": "酒精"
+  },
+  {
+    "eng": "alert",
+    "ch": "警覺的"
+  },
+  {
+    "eng": "allowance",
+    "ch": "零用錢"
+  },
+  {
+    "eng": "amateur",
+    "ch": "業餘的"
+  },
+  {
+    "eng": "ambiguous",
+    "ch": "含糊不清的"
+  },
+  {
+    "eng": "amuse",
+    "ch": "娛樂"
+  },
+  {
+    "eng": "ancestor",
+    "ch": "祖先"
+  },
+  {
+    "eng": "anniversary",
+    "ch": "週年紀念日"
+  },
+  {
+    "eng": "annoy",
+    "ch": "惹惱"
+  },
+  {
+    "eng": "anxiety",
+    "ch": "焦慮"
+  },
+  {
+    "eng": "apparent",
+    "ch": "明顯的"
+  },
+  {
+    "eng": "appreciation",
+    "ch": "欣賞"
+  },
+  {
+    "eng": "aquarium",
+    "ch": "水族館"
+  },
+  {
+    "eng": "arch",
+    "ch": "拱門"
+  },
+  {
+    "eng": "arise",
+    "ch": "發生"
+  },
+  {
+    "eng": "arms",
+    "ch": "武器"
+  },
+  {
+    "eng": "artificial",
+    "ch": "人造的"
+  },
+  {
+    "eng": "artistic",
+    "ch": "藝術的"
+  },
+  {
+    "eng": "ashamed",
+    "ch": "羞愧的"
+  },
+  {
+    "eng": "aspirin",
+    "ch": "阿斯匹靈"
+  },
+  {
+    "eng": "assembly",
+    "ch": "集會"
+  },
+  {
+    "eng": "associate",
+    "ch": "聯想"
+  },
+  {
+    "eng": "association",
+    "ch": "協會"
+  },
+  {
+    "eng": "assure",
+    "ch": "保證"
+  },
+  {
+    "eng": "athletic",
+    "ch": "運動的"
+  },
+  {
+    "eng": "atmosphere",
+    "ch": "氣氛"
+  },
+  {
+    "eng": "atom",
+    "ch": "原子;微粒"
+  },
+  {
+    "eng": "atomic",
+    "ch": "原子的"
+  },
+  {
+    "eng": "authentic",
+    "ch": "真實的"
+  },
+  {
+    "eng": "autobiography",
+    "ch": "自傳"
+  },
+  {
+    "eng": "autograph",
+    "ch": "親筆簽名"
+  },
+  {
+    "eng": "await",
+    "ch": "等待"
+  },
+  {
+    "eng": "abbreviate",
+    "ch": "縮寫"
+  },
+  {
+    "eng": "abide",
+    "ch": "遵守"
+  },
+  {
+    "eng": "aboriginal",
+    "ch": "原住民的"
+  },
+  {
+    "eng": "abstraction",
+    "ch": "抽象；心不在焉"
+  },
+  {
+    "eng": "abundance",
+    "ch": "豐富"
+  },
+  {
+    "eng": "academy",
+    "ch": "學院"
+  },
+  {
+    "eng": "accessory",
+    "ch": "配件"
+  },
+  {
+    "eng": "acclaim",
+    "ch": "歡呼；稱讚"
+  },
+  {
+    "eng": "accordance",
+    "ch": "一致;和諧"
+  },
+  {
+    "eng": "accountable",
+    "ch": "應負責任的"
+  },
+  {
+    "eng": "accumulate",
+    "ch": "累積"
+  },
+  {
+    "eng": "accumulation",
+    "ch": "累積"
+  },
+  {
+    "eng": "accusation",
+    "ch": "指控"
+  },
+  {
+    "eng": "accustom",
+    "ch": "使習慣"
+  },
+  {
+    "eng": "acne",
+    "ch": "粉刺"
+  },
+  {
+    "eng": "acre",
+    "ch": "英畝"
+  },
+  {
+    "eng": "adaptation",
+    "ch": "改編；適應"
+  },
+  {
+    "eng": "addiction",
+    "ch": "上癮"
+  },
+  {
+    "eng": "administer",
+    "ch": "管理"
+  },
+  {
+    "eng": "administrate",
+    "ch": "管理;支配"
+  },
+  {
+    "eng": "admiral",
+    "ch": "海軍上將"
+  },
+  {
+    "eng": "adolescence",
+    "ch": "青春期"
+  },
+  {
+    "eng": "advisory",
+    "ch": "勸告的"
+  },
+  {
+    "eng": "aesthetic",
+    "ch": "美學的"
+  },
+  {
+    "eng": "affectionate",
+    "ch": "深情的"
+  },
+  {
+    "eng": "airtight",
+    "ch": "密封的"
+  },
+  {
+    "eng": "airway",
+    "ch": "航線"
+  },
+  {
+    "eng": "algebra",
+    "ch": "代數"
+  },
+  {
+    "eng": "alienate",
+    "ch": "使疏遠"
+  },
+  {
+    "eng": "align",
+    "ch": "排成直線"
+  },
+  {
+    "eng": "allege",
+    "ch": "指控"
+  },
+  {
+    "eng": "alligator",
+    "ch": "短吻鱷"
+  },
+  {
+    "eng": "altitude",
+    "ch": "高度；海拔"
+  },
+  {
+    "eng": "ambiguity",
+    "ch": "不明確；含糊曖昧"
+  },
+  {
+    "eng": "amid",
+    "ch": "在...之中"
+  },
+  {
+    "eng": "amidst",
+    "ch": "在...當中"
+  },
+  {
+    "eng": "analogy",
+    "ch": "相似；類比"
+  },
+  {
+    "eng": "analytical",
+    "ch": "分析的"
+  },
+  {
+    "eng": "anchor",
+    "ch": "錨"
+  },
+  {
+    "eng": "animate",
+    "ch": "使有生氣"
+  },
+  {
+    "eng": "annoyance",
+    "ch": "惱怒"
+  },
+  {
+    "eng": "anthem",
+    "ch": "國歌"
+  },
+  {
+    "eng": "anticipation",
+    "ch": "期待"
+  },
+  {
+    "eng": "antonym",
+    "ch": "反義字"
+  },
+  {
+    "eng": "applicable",
+    "ch": "適用的"
+  },
+  {
+    "eng": "archaeology",
+    "ch": "考古學"
+  },
+  {
+    "eng": "archive",
+    "ch": "檔案"
+  },
+  {
+    "eng": "arithmetic",
+    "ch": "算術"
+  },
+  {
+    "eng": "ascend",
+    "ch": "上升"
+  },
+  {
+    "eng": "aspire",
+    "ch": "立志"
+  },
+  {
+    "eng": "assassinate",
+    "ch": "暗殺"
+  },
+  {
+    "eng": "asthma",
+    "ch": "氣喘"
+  },
+  {
+    "eng": "astray",
+    "ch": "迷途地"
+  },
+  {
+    "eng": "astronaut",
+    "ch": "太空人"
+  },
+  {
+    "eng": "astronomer",
+    "ch": "天文學家"
+  },
+  {
+    "eng": "attain",
+    "ch": "達到"
+  },
+  {
+    "eng": "auditorium",
+    "ch": "禮堂"
+  },
+  {
+    "eng": "avert",
+    "ch": "避免"
+  },
+  {
+    "eng": "aviation",
+    "ch": "航空"
+  },
+  {
+    "eng": "awesome",
+    "ch": "令人敬畏的"
+  },
+  {
+    "eng": "awhile",
+    "ch": "片刻"
+  }
+];
+
+    let usedIndices = [];
+    let history = [];
+    let currentQuestion = {};
+    const total = vocabList.length;
+    let historyIndex = 0;
+    let isHistoryMode = false;
+
+    const questionBox = document.getElementById('question');
+    const optionsBox = document.getElementById('options');
+    const resultBox = document.getElementById('result');
+    const counterBox = document.getElementById('counter');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const historyNav = document.getElementById('historyNav');
+
+    // 隨機打亂選項
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // 下一題
+    function nextQuestion() {
+      if (isHistoryMode) return;
+
+      resultBox.innerHTML = '';
+
+      if (usedIndices.length >= total) {
+        questionBox.textContent = '🎉 你已完成所有題目！';
+        optionsBox.innerHTML = '';
+        nextBtn.disabled = true;
+        counterBox.textContent = `總題數：${total}，已完成：${usedIndices.length}，剩下：0`;
+        return;
+      }
+
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * total);
+      } while (usedIndices.includes(randomIndex));
+
+      usedIndices.push(randomIndex);
+
+      currentQuestion = vocabList[randomIndex];
+
+      questionBox.textContent = `「${currentQuestion.eng}」的中文是？`;
+
+      // 播放英文發音（可選）
+      speakEnglish(currentQuestion.eng);
+
+      const choices = [currentQuestion.ch];
+      while (choices.length < 4) {
+        const choice = vocabList[Math.floor(Math.random() * vocabList.length)].ch;
+        if (!choices.includes(choice)) choices.push(choice);
+      }
+      shuffle(choices);
+
+      optionsBox.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.onclick = () => {
+          const isCorrect = choice === currentQuestion.ch;
+          resultBox.textContent = isCorrect
+            ? `✅ 答對了！「${currentQuestion.eng}」是「${currentQuestion.ch}」`
+            : `❌ 錯了！「${currentQuestion.eng}」應該是「${currentQuestion.ch}」，你選的是「${choice}」`;
+          
+          history.push({
+            eng: currentQuestion.eng,
+            ch: currentQuestion.ch,
+            selected: choice,
+            isCorrect
+          });
+        };
+        optionsBox.appendChild(btn);
+      });
+
+      counterBox.textContent = `總題數：${total}，已完成：${usedIndices.length}，剩下：${total - usedIndices.length}`;
+    }
+
+    // 播放英文發音
+    function speakEnglish(word) {
+      const msg = new SpeechSynthesisUtterance(word);
+      msg.lang = 'en-US';
+      window.speechSynthesis.speak(msg);
+    }
+
+    // 重置進度
+    function resetProgress() {
+      usedIndices = [];
+      history = [];
+      nextBtn.disabled = false;
+      isHistoryMode = false;
+      historyNav.style.display = 'none';
+      nextQuestion();
+    }
+
+    // 查看歷史題目
+    function showHistory() {
+      if (history.length === 0) {
+        alert('還沒有作答紀錄喔！');
+        return;
+      }
+      isHistoryMode = true;
+      historyIndex = 0;
+      nextBtn.style.display = 'none';
+      historyNav.style.display = 'block';
+      showCurrentHistory();
+    }
+
+    function showCurrentHistory() {
+      const currentHistoryItem = history[historyIndex];
+      questionBox.textContent = `「${currentHistoryItem.eng}」的中文是？`;
+      resultBox.textContent = currentHistoryItem.isCorrect
+        ? `✅ 答對了！「${currentHistoryItem.eng}」是「${currentHistoryItem.ch}」`
+        : `❌ 錯了！「${currentHistoryItem.eng}」應該是「${currentHistoryItem.ch}」，你選的是「${currentHistoryItem.selected}」`;
+    }
+
+    function showPrevHistory() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        showCurrentHistory();
+      }
+    }
+
+    function showNextHistory() {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        showCurrentHistory();
+      }
+    }
+
+    function returnToQuiz() {
+      isHistoryMode = false;
+      nextBtn.style.display = 'block';
+      historyNav.style.display = 'none';
+      nextQuestion();
+    }
+
+    nextQuestion();
+  </script>
+</body>
+</html>
